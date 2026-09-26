@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hans Order Management System</title>
+    <title>Hans Order & Financial Management System</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -54,15 +54,33 @@
         .fire-border-glow {
             box-shadow: 0 0 15px rgba(220, 38, 38, 0.25);
         }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #detailModal, #detailModal * {
+                visibility: visible;
+            }
+            #detailModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-darkbg text-gray-200 min-h-screen font-sans flex flex-col antialiased">
 
-    
     <!-- LOGIN SCREEN -->
     <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-darkbg px-4">
         <div class="bg-darkcard border border-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl fire-border-glow text-center">
-            <!-- Logo Hans Display -->
             <div class="relative w-28 h-28 mx-auto mb-4 rounded-full p-1 bg-gradient-to-tr from-red-600 via-orange-500 to-yellow-400 shadow-lg flex items-center justify-center">
                 <div class="w-full h-full bg-darkbg rounded-full flex flex-col items-center justify-center p-2 border border-black/50">
                     <span class="text-3xl font-black tracking-wider text-red-500 italic">Hans</span>
@@ -71,7 +89,7 @@
             </div>
 
             <h2 class="text-2xl font-bold fire-gradient-text mb-1">Hans Production</h2>
-            <p class="text-xs text-gray-400 mb-6">Sistem Manajemen Order & Produksi</p>
+            <p class="text-xs text-gray-400 mb-6">Manajemen Order & Keuangan Harian</p>
 
             <form id="loginForm" class="space-y-4 text-left">
                 <div>
@@ -110,25 +128,35 @@
         <!-- HEADER / NAVIGATION -->
         <header class="bg-darkcard border-b border-gray-800 sticky top-0 z-30 shadow-md">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600 to-yellow-500 p-0.5 flex items-center justify-center">
-                        <div class="w-full h-full bg-darkbg rounded-full flex flex-col items-center justify-center p-1">
-                            <span class="text-xs font-black text-red-500 italic">Hans</span>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600 to-yellow-500 p-0.5 flex items-center justify-center">
+                            <div class="w-full h-full bg-darkbg rounded-full flex flex-col items-center justify-center p-1">
+                                <span class="text-xs font-black text-red-500 italic">Hans</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-bold tracking-wide text-white flex items-center">
+                                Hans <span class="ml-1 text-xs text-red-500 font-semibold px-2 py-0.5 rounded bg-red-950/60 border border-red-800/40">Production</span>
+                            </h1>
+                            <p class="text-[10px] text-gray-400">Order & Financial Tracking</p>
                         </div>
                     </div>
-                    <div>
-                        <h1 class="text-lg font-bold tracking-wide text-white flex items-center">
-                            Hans <span class="ml-1 text-xs text-red-500 font-semibold px-2 py-0.5 rounded bg-red-950/60 border border-red-800/40">Management</span>
-                        </h1>
-                        <p class="text-[10px] text-gray-400">Database & Order Tracking System</p>
-                    </div>
+
+                    <!-- TAB NAVIGATION -->
+                    <nav class="hidden md:flex space-x-2">
+                        <button id="tabOrdersBtn" onclick="switchTab('orders')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition flex items-center space-x-1">
+                            <i class="fas fa-boxes"></i>
+                            <span>Daftar Order</span>
+                        </button>
+                        <button id="tabFinanceBtn" onclick="switchTab('finance')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-darkbg text-gray-400 hover:text-white transition flex items-center space-x-1 border border-gray-800">
+                            <i class="fas fa-file-invoice-dollar text-green-400"></i>
+                            <span>Keuangan Harian</span>
+                        </button>
+                    </nav>
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <div class="hidden md:flex items-center space-x-2 text-xs text-gray-400 bg-darkbg px-3 py-1.5 rounded-lg border border-gray-800">
-                        <i class="fas fa-user-circle text-red-500 text-sm"></i>
-                        <span>Admin Production</span>
-                    </div>
                     <button id="logoutBtn" class="bg-gray-800 hover:bg-red-900/60 text-gray-300 hover:text-red-300 text-xs px-3 py-2 rounded-lg border border-gray-700 transition flex items-center space-x-1">
                         <i class="fas fa-power-off"></i>
                         <span class="hidden sm:inline">Keluar</span>
@@ -137,9 +165,8 @@
             </div>
         </header>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
-            
+        <!-- VIEW 1: MANAGEMENT ORDER -->
+        <main id="ordersView" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
             <!-- STATS SUMMARY CARDS -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-darkcard border border-gray-800 p-4 rounded-xl flex items-center space-x-4">
@@ -153,7 +180,7 @@
                 </div>
                 <div class="bg-darkcard border border-gray-800 p-4 rounded-xl flex items-center space-x-4">
                     <div class="p-3 bg-yellow-950/50 text-yellow-500 rounded-lg border border-yellow-900/40">
-                        <i class="fas fa-spinner text-xl animate-spin-slow"></i>
+                        <i class="fas fa-spinner text-xl"></i>
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Proses Produksi</p>
@@ -174,7 +201,7 @@
                         <i class="fas fa-wallet text-xl"></i>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400">Omset Total</p>
+                        <p class="text-xs text-gray-400">Total Omset</p>
                         <h3 id="statTotalRevenue" class="text-base sm:text-lg font-bold text-white">Rp 0</h3>
                     </div>
                 </div>
@@ -220,15 +247,14 @@
                             <tr class="bg-darkbg text-gray-400 border-b border-gray-800 text-xs uppercase">
                                 <th class="p-3">Order ID / Desain</th>
                                 <th class="p-3">Nama Customer</th>
-                                <th class="p-3">Tanggal / Deadline</th>
-                                <th class="p-3">Rincian Qty</th>
-                                <th class="p-3">Total Tagihan</th>
-                                <th class="p-3 text-center">Status</th>
+                                <th class="p-3">Masuk / Deadline</th>
+                                <th class="p-3">Total & DP</th>
+                                <th class="p-3 text-center">Status Bayar</th>
+                                <th class="p-3 text-center">Status Produksi</th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="ordersTableBody" class="divide-y divide-gray-800 text-gray-300">
-                            <!-- JS Inject Table Rows Here -->
                         </tbody>
                     </table>
                 </div>
@@ -236,6 +262,74 @@
                 <div id="emptyState" class="hidden p-12 text-center">
                     <i class="fas fa-folder-open text-4xl text-gray-600 mb-3"></i>
                     <p class="text-gray-400 text-sm">Belum ada data order yang cocok.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- VIEW 2: HALAMAN PEMBUKUAN KEUANGAN HARIAN -->
+        <main id="financeView" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+            <!-- HEADER KEUANGAN & FILTER TANGGAL -->
+            <div class="bg-darkcard p-4 rounded-xl border border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                        <i class="fas fa-cash-register text-green-500"></i>
+                        <span>Laporan Pembukuan Keuangan Harian</span>
+                    </h2>
+                    <p class="text-xs text-gray-400">Ringkasan transaksi DP, pelunasan, dan piutang pelanggan</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs text-gray-400">Pilih Tanggal:</label>
+                    <input type="date" id="financeDateFilter" class="bg-darkinput border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <!-- CARDS RINGKASAN KEUANGAN -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-darkcard border border-gray-800 p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">Total Pemasukan (DP + Lunas)</span>
+                    <h3 id="finTotalReceived" class="text-xl font-bold text-green-400">Rp 0</h3>
+                    <span class="text-[10px] text-gray-500">Kas nyata diterima pada tanggal ini</span>
+                </div>
+                <div class="bg-darkcard border border-gray-800 p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">Total DP Diterima</span>
+                    <h3 id="finTotalDP" class="text-xl font-bold text-yellow-400">Rp 0</h3>
+                    <span class="text-[10px] text-gray-500">Uang muka pesanan masuk</span>
+                </div>
+                <div class="bg-darkcard border border-gray-800 p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">Sisa Piutang / Belum Bayar</span>
+                    <h3 id="finTotalUnpaid" class="text-xl font-bold text-red-400">Rp 0</h3>
+                    <span class="text-[10px] text-gray-500">Tagihan yang masih menggantung</span>
+                </div>
+                <div class="bg-darkcard border border-gray-800 p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">Potensi Omset Order</span>
+                    <h3 id="finTotalTarget" class="text-xl font-bold text-blue-400">Rp 0</h3>
+                    <span class="text-[10px] text-gray-500">Nilai total dari order tanggal ini</span>
+                </div>
+            </div>
+
+            <!-- RINCIAN TRANSAKSI KAS MASUK -->
+            <div class="bg-darkcard rounded-xl border border-gray-800 overflow-hidden shadow-xl">
+                <div class="p-4 border-b border-gray-800">
+                    <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                        <i class="fas fa-file-invoice-dollar text-green-400"></i>
+                        <span>Rincian Transaksi Pemasukan Order</span>
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-darkbg text-gray-400 border-b border-gray-800 text-xs uppercase">
+                                <th class="p-3">ID Order</th>
+                                <th class="p-3">Nama Customer</th>
+                                <th class="p-3">Total Order</th>
+                                <th class="p-3">Uang Muka (DP)</th>
+                                <th class="p-3">Sisa Kekurangan</th>
+                                <th class="p-3 text-center">Status Bayar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financeTableBody" class="divide-y divide-gray-800 text-gray-300">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -274,7 +368,7 @@
                             <input type="date" id="inputDeadline" required class="w-full bg-darkinput border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">Status Awal</label>
+                            <label class="block text-xs text-gray-400 mb-1">Status Produksi</label>
                             <select id="inputStatus" class="w-full bg-darkinput border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
                                 <option value="Pending">Pending</option>
                                 <option value="Proses">Dalam Proses</option>
@@ -288,10 +382,9 @@
                 <div>
                     <h4 class="text-xs uppercase font-bold text-red-400 tracking-wider mb-3">2. Rincian Pakaian & Harga</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Lengan Pendek -->
                         <div class="bg-darkbg p-3 rounded-xl border border-gray-800 space-y-2">
                             <span class="text-xs font-semibold text-gray-300 block border-b border-gray-800 pb-1">
-                                <i class="fas fa-[#tshirt] text-orange-400 mr-1"></i> Lengan Pendek
+                                <i class="fas fa-shirt text-orange-400 mr-1"></i> Lengan Pendek
                             </span>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
@@ -305,10 +398,9 @@
                             </div>
                         </div>
 
-                        <!-- Lengan Panjang -->
                         <div class="bg-darkbg p-3 rounded-xl border border-gray-800 space-y-2">
                             <span class="text-xs font-semibold text-gray-300 block border-b border-gray-800 pb-1">
-                                <i class="fas fa-tshirt text-yellow-400 mr-1"></i> Lengan Panjang
+                                <i class="fas fa-shirt text-yellow-400 mr-1"></i> Lengan Panjang
                             </span>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
@@ -322,10 +414,9 @@
                             </div>
                         </div>
 
-                        <!-- Cas Ukuran Jumbo -->
                         <div class="md:col-span-2 bg-darkbg p-3 rounded-xl border border-gray-800 space-y-2">
                             <span class="text-xs font-semibold text-gray-300 block border-b border-gray-800 pb-1">
-                                <i class="fas fa-expand-alt text-red-400 mr-1"></i> Surcharge / Cas Ukuran Jumbo (XXL, 3XL, dst)
+                                <i class="fas fa-expand-alt text-red-400 mr-1"></i> Cas Ukuran Jumbo (XXL, 3XL, dst)
                             </span>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div>
@@ -341,10 +432,27 @@
                     </div>
                 </div>
 
+                <!-- FITUR PEMBAYARAN DP & LUNAS -->
+                <div>
+                    <h4 class="text-xs uppercase font-bold text-red-400 tracking-wider mb-3">3. Pembayaran & Down Payment (DP)</h4>
+                    <div class="bg-darkbg p-4 rounded-xl border border-gray-800 space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Jumlah DP Diterima (Rp)</label>
+                                <input type="number" id="inputDP" min="0" value="0" class="calc-trigger w-full bg-darkinput border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Sisa Pembayaran (Rp)</label>
+                                <input type="text" id="displayRemaining" readonly value="Rp 0" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm font-bold text-red-400">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TOTAL RINGKASAN HARGA -->
                 <div class="bg-gradient-to-r from-red-950/40 via-darkbg to-darkbg border border-red-900/50 p-4 rounded-xl flex items-center justify-between">
                     <div>
-                        <span class="text-xs text-gray-400 block">Total Estimasi Tagihan:</span>
+                        <span class="text-xs text-gray-400 block">Total Tagihan:</span>
                         <span id="calculatedTotalDisplay" class="text-xl font-bold text-yellow-400">Rp 0</span>
                     </div>
                     <div class="text-right text-xs text-gray-400">
@@ -352,18 +460,17 @@
                     </div>
                 </div>
 
-                <!-- UPLOAD GAMBAR DESAIN PRODUKSI -->
+                <!-- UPLOAD GAMBAR DESAIN -->
                 <div>
-                    <h4 class="text-xs uppercase font-bold text-red-400 tracking-wider mb-3">3. Foto Desain Order Produksi</h4>
+                    <h4 class="text-xs uppercase font-bold text-red-400 tracking-wider mb-3">4. Foto Desain Order Produksi</h4>
                     <div class="flex flex-col sm:flex-row items-center gap-4">
                         <div id="imagePreviewContainer" class="w-32 h-32 bg-darkbg border-2 border-dashed border-gray-700 rounded-xl flex items-center justify-center overflow-hidden shrink-0 relative">
                             <span id="noImgText" class="text-xs text-gray-500 text-center p-2">Belum ada gambar</span>
                             <img id="imagePreview" class="hidden w-full h-full object-cover">
                         </div>
                         <div class="flex-1 w-full space-y-2">
-                            <label class="block text-xs text-gray-400">Upload Desain / Template Jersey</label>
+                            <label class="block text-xs text-gray-400">Upload Desain Jersey</label>
                             <input type="file" id="inputImageFile" accept="image/*" class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-950/60 file:text-red-300 hover:file:bg-red-900 cursor-pointer border border-gray-800 rounded-lg bg-darkbg">
-                            <p class="text-[10px] text-gray-500">Format JPG, PNG. Gambar disimpan otomatis secara lokal.</p>
                         </div>
                     </div>
                 </div>
@@ -376,13 +483,13 @@
         </div>
     </div>
 
-    <!-- DETAIL / VIEW ORDER MODAL -->
+    <!-- DETAIL MODAL / SPK NOTA -->
     <div id="detailModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-darkcard border border-gray-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
-            <div class="p-4 bg-darkbg border-b border-gray-800 flex justify-between items-center">
+            <div class="p-4 bg-darkbg border-b border-gray-800 flex justify-between items-center no-print">
                 <h3 class="text-lg font-bold text-white flex items-center space-x-2">
                     <i class="fas fa-info-circle text-red-500"></i>
-                    <span>Rincian Order Hans Printing</span>
+                    <span>Rincian Order & SPK Hans Printing</span>
                 </h3>
                 <button id="closeDetailModal" class="text-gray-400 hover:text-white">
                     <i class="fas fa-times text-lg"></i>
@@ -390,10 +497,9 @@
             </div>
 
             <div id="detailContent" class="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
-                <!-- JS Populated -->
             </div>
 
-            <div class="p-4 bg-darkbg border-t border-gray-800 flex justify-between items-center">
+            <div class="p-4 bg-darkbg border-t border-gray-800 flex justify-between items-center no-print">
                 <button id="printOrderBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-3 py-2 rounded-lg border border-gray-700 flex items-center space-x-1">
                     <i class="fas fa-print"></i>
                     <span>Cetak Nota / SPK</span>
@@ -404,13 +510,12 @@
     </div>
 
     <script>
-        // Default Sample Data if LocalStorage empty
         const INITIAL_ORDERS = [
             {
                 id: "ORD-1001",
                 customerName: "Tim Futsal FC Renegade",
-                dateIn: "2026-03-20",
-                deadline: "2026-03-28",
+                dateIn: "2026-03-26",
+                deadline: "2026-03-30",
                 qtyShort: 12,
                 priceShort: 75000,
                 qtyLong: 3,
@@ -418,41 +523,26 @@
                 sizeExtraNote: "XXL 2Pcs",
                 priceSizeCharge: 20000,
                 totalPrice: 1175000,
+                dpAmount: 500000,
                 totalQty: 15,
                 status: "Proses",
                 image: "https://placehold.co/400x400/2a2a2a/dc2626?text=Jersey+Renegade"
-            },
-            {
-                id: "ORD-1002",
-                customerName: "Komunitas Motor Vixion",
-                dateIn: "2026-03-22",
-                deadline: "2026-04-02",
-                qtyShort: 25,
-                priceShort: 70000,
-                qtyLong: 5,
-                priceLong: 80000,
-                sizeExtraNote: "3XL 1Pc",
-                priceSizeCharge: 15000,
-                totalPrice: 2165000,
-                totalQty: 30,
-                status: "Pending",
-                image: "https://placehold.co/400x400/2a2a2a/eab308?text=Kaos+Vixion"
             }
         ];
 
-        // State Store
         let orders = [];
         let currentBase64Image = "";
 
-        // DOM Element Selectors
         const loginPage = document.getElementById('loginPage');
         const loginForm = document.getElementById('loginForm');
         const loginError = document.getElementById('loginError');
         const appContainer = document.getElementById('appContainer');
         const logoutBtn = document.getElementById('logoutBtn');
 
+        const ordersView = document.getElementById('ordersView');
+        const financeView = document.getElementById('financeView');
         const ordersTableBody = document.getElementById('ordersTableBody');
-        const emptyState = document.getElementById('emptyState');
+        const financeTableBody = document.getElementById('financeTableBody');
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
 
@@ -471,18 +561,39 @@
         const closeDetailBtn = document.getElementById('closeDetailBtn');
         const detailContent = document.getElementById('detailContent');
         const printOrderBtn = document.getElementById('printOrderBtn');
+        const financeDateFilter = document.getElementById('financeDateFilter');
 
-        
-        // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
             loadDatabase();
             setupCalculators();
             
-            // Check session login state
+            // Set default tanggal filter keuangan ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            financeDateFilter.value = today;
+
             if (sessionStorage.getItem('hans_auth') === 'true') {
                 showDashboard();
             }
         });
+
+        // Tab Switching Logic
+        window.switchTab = function(tab) {
+            const btnOrders = document.getElementById('tabOrdersBtn');
+            const btnFinance = document.getElementById('tabFinanceBtn');
+
+            if (tab === 'orders') {
+                ordersView.classList.remove('hidden');
+                financeView.classList.add('hidden');
+                btnOrders.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition flex items-center space-x-1";
+                btnFinance.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-darkbg text-gray-400 hover:text-white transition flex items-center space-x-1 border border-gray-800";
+            } else {
+                ordersView.classList.add('hidden');
+                financeView.classList.remove('hidden');
+                btnFinance.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition flex items-center space-x-1";
+                btnOrders.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-darkbg text-gray-400 hover:text-white transition flex items-center space-x-1 border border-gray-800";
+                renderFinanceTable();
+            }
+        };
 
         // Login System
         loginForm.addEventListener('submit', (e) => {
@@ -512,7 +623,6 @@
             updateStats();
         }
 
-        // Database LocalStorage Functions
         function loadDatabase() {
             const saved = localStorage.getItem('hans_orders');
             if (saved) {
@@ -541,26 +651,26 @@
         function calculateTotals() {
             const qtyShort = parseInt(document.getElementById('qtyShort').value) || 0;
             const priceShort = parseInt(document.getElementById('priceShort').value) || 0;
-            
             const qtyLong = parseInt(document.getElementById('qtyLong').value) || 0;
             const priceLong = parseInt(document.getElementById('priceLong').value) || 0;
-            
             const sizeCharge = parseInt(document.getElementById('priceSizeCharge').value) || 0;
+            const dpAmount = parseInt(document.getElementById('inputDP').value) || 0;
 
             const totalQty = qtyShort + qtyLong;
             const totalPrice = (qtyShort * priceShort) + (qtyLong * priceLong) + sizeCharge;
+            const remaining = totalPrice - dpAmount;
 
             document.getElementById('calculatedQtyDisplay').innerText = totalQty;
             document.getElementById('calculatedTotalDisplay').innerText = formatRupiah(totalPrice);
+            document.getElementById('displayRemaining').value = formatRupiah(remaining > 0 ? remaining : 0);
 
-            return { totalQty, totalPrice };
+            return { totalQty, totalPrice, dpAmount, remaining };
         }
 
         function formatRupiah(num) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
         }
 
-        // Image Reader File Converter
         inputImageFile.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -575,76 +685,69 @@
             }
         });
 
-        // Render Table Data
+        // Render Tabel Order Utama
         function renderTable() {
-            const query = searchInput.value.toLowerCase();
-            const filterVal = statusFilter.value;
+            const query = searchInput.value.toLowerCase().trim();
+            const statusVal = statusFilter.value;
 
-            ordersTableBody.innerHTML = '';
-
-            const filteredOrders = orders.filter(ord => {
-                const matchesSearch = ord.customerName.toLowerCase().includes(query) || ord.id.toLowerCase().includes(query);
-                const matchesStatus = filterVal === 'ALL' || ord.status === filterVal;
-                return matchesSearch && matchesStatus;
+            const filtered = orders.filter(ord => {
+                const matchSearch = ord.customerName.toLowerCase().includes(query) || ord.id.toLowerCase().includes(query);
+                const matchStatus = (statusVal === 'ALL') || (ord.status === statusVal);
+                return matchSearch && matchStatus;
             });
 
-            document.getElementById('orderCounter').innerText = `${filteredOrders.length} Order`;
+            ordersTableBody.innerHTML = '';
+            document.getElementById('orderCounter').innerText = `${filtered.length} Order`;
 
-            if (filteredOrders.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            } else {
-                emptyState.classList.add('hidden');
-            }
+            filtered.forEach(item => {
+                const sisa = item.totalPrice - (item.dpAmount || 0);
+                const isLunas = sisa <= 0;
 
-            filteredOrders.forEach(ord => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-800/50 transition";
-
-                let statusBadge = '';
-                if(ord.status === 'Pending') {
-                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-800 text-yellow-400 border border-yellow-800/40"><i class="fas fa-clock mr-1"></i>Pending</span>`;
-                } else if(ord.status === 'Proses') {
-                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-950/70 text-blue-400 border border-blue-800/40"><i class="fas fa-cog fa-spin mr-1"></i>Proses</span>`;
-                } else {
-                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-950/70 text-green-400 border border-green-800/40"><i class="fas fa-check mr-1"></i>Selesai</span>`;
-                }
-
-                const thumb = ord.image || 'https://placehold.co/100x100/2a2a2a/666?text=No+Img';
+                tr.className = "hover:bg-darkinput/40 transition border-b border-gray-800/60";
 
                 tr.innerHTML = `
                     <td class="p-3">
                         <div class="flex items-center space-x-3">
-                            <img src="${thumb}" class="w-12 h-12 object-cover rounded-lg bg-darkinput border border-gray-700 shrink-0">
+                            <img src="${item.image || 'https://placehold.co/100x100/2a2a2a/888?text=No+Img'}" class="w-10 h-10 rounded-lg object-cover border border-gray-700 shrink-0">
                             <div>
-                                <span class="font-bold text-white text-xs block">${ord.id}</span>
-                                <span class="text-[11px] text-gray-500">${ord.totalQty} Pcs Total</span>
+                                <span class="font-bold text-white text-xs block">${item.id}</span>
+                                <span class="text-[10px] text-gray-400">${item.totalQty} Pcs</span>
                             </div>
                         </div>
                     </td>
-                    <td class="p-3 font-medium text-white">${escapeHtml(ord.customerName)}</td>
-                    <td class="p-3">
-                        <div class="text-xs">
-                            <div class="text-gray-400"><i class="far fa-calendar-alt mr-1"></i>Masuk: ${ord.dateIn}</div>
-                            <div class="text-red-400 font-semibold"><i class="far fa-calendar-check mr-1"></i>Deadline: ${ord.deadline}</div>
-                        </div>
+                    <td class="p-3 font-semibold text-gray-200">${item.customerName}</td>
+                    <td class="p-3 text-xs">
+                        <div><i class="far fa-calendar-alt text-gray-500 mr-1"></i> ${item.dateIn}</div>
+                        <div class="text-red-400 font-medium"><i class="far fa-clock mr-1"></i> ${item.deadline}</div>
                     </td>
-                    <td class="p-3 text-xs text-gray-300">
-                        <div>Lgn Pendek: <b>${ord.qtyShort}</b> Pcs</div>
-                        <div>Lgn Panjang: <b>${ord.qtyLong}</b> Pcs</div>
+                    <td class="p-3 text-xs">
+                        <span class="font-bold text-white block">${formatRupiah(item.totalPrice)}</span>
+                        <span class="text-[10px] text-green-400">DP: ${formatRupiah(item.dpAmount || 0)}</span>
                     </td>
-                    <td class="p-3 font-bold text-yellow-400">${formatRupiah(ord.totalPrice)}</td>
-                    <td class="p-3 text-center">${statusBadge}</td>
+                    <td class="p-3 text-center">
+                        ${isLunas ? 
+                            `<span class="bg-green-950/80 text-green-400 border border-green-700/50 text-[11px] px-2.5 py-1 rounded-full font-medium">Lunas</span>` : 
+                            `<span class="bg-yellow-950/80 text-yellow-400 border border-yellow-700/50 text-[10px] px-2 py-0.5 rounded-full block">Sisa: ${formatRupiah(sisa)}</span>`
+                        }
+                    </td>
+                    <td class="p-3 text-center">
+                        <select onchange="quickUpdateStatus('${item.id}', this.value)" class="bg-darkbg border border-gray-700 text-xs rounded px-2 py-1 text-gray-300 focus:outline-none focus:border-red-500">
+                            <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Proses" ${item.status === 'Proses' ? 'selected' : ''}>Proses</option>
+                            <option value="Selesai" ${item.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                        </select>
+                    </td>
                     <td class="p-3 text-center">
                         <div class="flex items-center justify-center space-x-2">
-                            <button onclick="viewDetail('${ord.id}')" title="Lihat Detail" class="p-2 bg-gray-800 hover:bg-gray-700 text-blue-400 rounded-lg transition">
-                                <i class="fas fa-eye"></i>
+                            <button onclick="viewDetail('${item.id}')" title="Detail & SPK" class="p-1.5 bg-blue-950/60 text-blue-400 hover:text-white rounded border border-blue-800/40">
+                                <i class="fas fa-eye text-xs"></i>
                             </button>
-                            <button onclick="editOrder('${ord.id}')" title="Edit Order" class="p-2 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded-lg transition">
-                                <i class="fas fa-edit"></i>
+                            <button onclick="editOrder('${item.id}')" title="Edit" class="p-1.5 bg-yellow-950/60 text-yellow-400 hover:text-white rounded border border-yellow-800/40">
+                                <i class="fas fa-edit text-xs"></i>
                             </button>
-                            <button onclick="deleteOrder('${ord.id}')" title="Hapus Order" class="p-2 bg-gray-800 hover:bg-red-900/60 text-red-400 rounded-lg transition">
-                                <i class="fas fa-trash-alt"></i>
+                            <button onclick="deleteOrder('${item.id}')" title="Hapus" class="p-1.5 bg-red-950/60 text-red-400 hover:text-white rounded border border-red-800/40">
+                                <i class="fas fa-trash text-xs"></i>
                             </button>
                         </div>
                     </td>
@@ -653,27 +756,72 @@
             });
         }
 
-        function updateStats() {
-            const totalOrders = orders.length;
-            const processing = orders.filter(o => o.status === 'Proses').length;
-            const completed = orders.filter(o => o.status === 'Selesai').length;
-            const revenue = orders.reduce((sum, o) => sum + o.totalPrice, 0);
+        // Render Halaman Keuangan Harian
+        function renderFinanceTable() {
+            const selectedDate = financeDateFilter.value;
+            financeTableBody.innerHTML = '';
 
-            document.getElementById('statTotalOrders').innerText = totalOrders;
-            document.getElementById('statProcessingOrders').innerText = processing;
-            document.getElementById('statCompletedOrders').innerText = completed;
-            document.getElementById('statTotalRevenue').innerText = formatRupiah(revenue);
+            let totalReceived = 0;
+            let totalDP = 0;
+            let totalUnpaid = 0;
+            let totalTarget = 0;
+
+            const dayOrders = orders.filter(o => o.dateIn === selectedDate);
+
+            dayOrders.forEach(item => {
+                const sisa = item.totalPrice - (item.dpAmount || 0);
+                totalReceived += (item.dpAmount || 0);
+                totalDP += (item.dpAmount || 0);
+                totalUnpaid += sisa > 0 ? sisa : 0;
+                totalTarget += item.totalPrice;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-darkinput/40 transition border-b border-gray-800/60";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-xs text-white">${item.id}</td>
+                    <td class="p-3">${item.customerName}</td>
+                    <td class="p-3 font-semibold text-white">${formatRupiah(item.totalPrice)}</td>
+                    <td class="p-3 text-green-400 font-bold">${formatRupiah(item.dpAmount || 0)}</td>
+                    <td class="p-3 text-red-400">${formatRupiah(sisa > 0 ? sisa : 0)}</td>
+                    <td class="p-3 text-center">
+                        ${sisa <= 0 ? 
+                            `<span class="bg-green-950/80 text-green-400 border border-green-700/50 text-[10px] px-2 py-0.5 rounded-full">LUNAS</span>` : 
+                            `<span class="bg-yellow-950/80 text-yellow-400 border border-yellow-700/50 text-[10px] px-2 py-0.5 rounded-full">BELUM LUNAS</span>`
+                        }
+                    </td>
+                `;
+                financeTableBody.appendChild(tr);
+            });
+
+            document.getElementById('finTotalReceived').innerText = formatRupiah(totalReceived);
+            document.getElementById('finTotalDP').innerText = formatRupiah(totalDP);
+            document.getElementById('finTotalUnpaid').innerText = formatRupiah(totalUnpaid);
+            document.getElementById('finTotalTarget').innerText = formatRupiah(totalTarget);
         }
 
-        // Modal Operations (Add / Edit)
+        financeDateFilter.addEventListener('change', renderFinanceTable);
+
+        function updateStats() {
+            document.getElementById('statTotalOrders').innerText = orders.length;
+            document.getElementById('statProcessingOrders').innerText = orders.filter(o => o.status === 'Proses').length;
+            document.getElementById('statCompletedOrders').innerText = orders.filter(o => o.status === 'Selesai').length;
+
+            const totalRev = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+            document.getElementById('statTotalRevenue').innerText = formatRupiah(totalRev);
+        }
+
+        searchInput.addEventListener('input', renderTable);
+        statusFilter.addEventListener('change', renderTable);
+
         openNewOrderModal.addEventListener('click', () => {
-            resetModalForm();
-            document.getElementById('modalTitle').innerHTML = `<i class="fas fa-plus-circle text-red-500"></i><span>Tambah Pesanan Baru</span>`;
-            
-            // Set default date
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('inputDateIn').value = today;
-            
+            document.getElementById('modalTitle').innerText = "Tambah Pesanan Baru";
+            document.getElementById('editOrderId').value = "";
+            orderForm.reset();
+            currentBase64Image = "";
+            imagePreview.classList.add('hidden');
+            noImgText.classList.remove('hidden');
+            document.getElementById('inputDateIn').valueAsDate = new Date();
+            calculateTotals();
             orderModal.classList.remove('hidden');
         });
 
@@ -684,49 +832,38 @@
         closeOrderModal.addEventListener('click', closeModal);
         cancelOrderModal.addEventListener('click', closeModal);
 
-        function resetModalForm() {
-            orderForm.reset();
-            document.getElementById('editOrderId').value = '';
-            currentBase64Image = '';
-            imagePreview.src = '';
-            imagePreview.classList.add('hidden');
-            noImgText.classList.remove('hidden');
-            calculateTotals();
-        }
-
-        // Handle Save Order
         orderForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
             const editId = document.getElementById('editOrderId').value;
-            const calc = calculateTotals();
+            const totals = calculateTotals();
 
-            const orderData = {
-                id: editId ? editId : 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+            const newOrderData = {
+                id: editId || ("ORD-" + Math.floor(1000 + Math.random() * 9000)),
                 customerName: document.getElementById('inputCustomerName').value,
                 dateIn: document.getElementById('inputDateIn').value,
                 deadline: document.getElementById('inputDeadline').value,
+                status: document.getElementById('inputStatus').value,
+                
                 qtyShort: parseInt(document.getElementById('qtyShort').value) || 0,
                 priceShort: parseInt(document.getElementById('priceShort').value) || 0,
                 qtyLong: parseInt(document.getElementById('qtyLong').value) || 0,
                 priceLong: parseInt(document.getElementById('priceLong').value) || 0,
+                
                 sizeExtraNote: document.getElementById('sizeExtraNote').value,
                 priceSizeCharge: parseInt(document.getElementById('priceSizeCharge').value) || 0,
-                totalPrice: calc.totalPrice,
-                totalQty: calc.totalQty,
-                status: document.getElementById('inputStatus').value,
-                image: currentBase64Image || 'https://placehold.co/400x400/2a2a2a/dc2626?text=Order+Hans'
+                
+                totalQty: totals.totalQty,
+                totalPrice: totals.totalPrice,
+                dpAmount: totals.dpAmount,
+                image: currentBase64Image || (editId ? (orders.find(o => o.id === editId)?.image || "") : "https://placehold.co/400x400/2a2a2a/dc2626?text=Jersey")
             };
 
             if (editId) {
-                // Update Existing
-                const idx = orders.findIndex(o => o.id === editId);
-                if (idx !== -1) {
-                    orders[idx] = orderData;
-                }
+                const index = orders.findIndex(o => o.id === editId);
+                if (index !== -1) orders[index] = newOrderData;
             } else {
-                // Insert New
-                orders.unshift(orderData);
+                orders.unshift(newOrderData);
             }
 
             saveDatabase();
@@ -735,41 +872,51 @@
             closeModal();
         });
 
-        // Edit Existing Order
+        window.quickUpdateStatus = function(id, newStatus) {
+            const item = orders.find(o => o.id === id);
+            if (item) {
+                item.status = newStatus;
+                saveDatabase();
+                updateStats();
+            }
+        };
+
         window.editOrder = function(id) {
-            const ord = orders.find(o => o.id === id);
-            if (!ord) return;
+            const item = orders.find(o => o.id === id);
+            if (!item) return;
 
-            resetModalForm();
-            document.getElementById('modalTitle').innerHTML = `<i class="fas fa-edit text-yellow-500"></i><span>Edit Pesanan ${ord.id}</span>`;
-            document.getElementById('editOrderId').value = ord.id;
-            
-            document.getElementById('inputCustomerName').value = ord.customerName;
-            document.getElementById('inputDateIn').value = ord.dateIn;
-            document.getElementById('inputDeadline').value = ord.deadline;
-            document.getElementById('inputStatus').value = ord.status;
+            document.getElementById('modalTitle').innerText = "Edit Pesanan - " + item.id;
+            document.getElementById('editOrderId').value = item.id;
+            document.getElementById('inputCustomerName').value = item.customerName;
+            document.getElementById('inputDateIn').value = item.dateIn;
+            document.getElementById('inputDeadline').value = item.deadline;
+            document.getElementById('inputStatus').value = item.status;
 
-            document.getElementById('qtyShort').value = ord.qtyShort;
-            document.getElementById('priceShort').value = ord.priceShort;
-            document.getElementById('qtyLong').value = ord.qtyLong;
-            document.getElementById('priceLong').value = ord.priceLong;
-            document.getElementById('sizeExtraNote').value = ord.sizeExtraNote || '';
-            document.getElementById('priceSizeCharge').value = ord.priceSizeCharge || 0;
+            document.getElementById('qtyShort').value = item.qtyShort;
+            document.getElementById('priceShort').value = item.priceShort;
+            document.getElementById('qtyLong').value = item.qtyLong;
+            document.getElementById('priceLong').value = item.priceLong;
 
-            if (ord.image) {
-                currentBase64Image = ord.image;
-                imagePreview.src = ord.image;
+            document.getElementById('sizeExtraNote').value = item.sizeExtraNote || "";
+            document.getElementById('priceSizeCharge').value = item.priceSizeCharge || 0;
+            document.getElementById('inputDP').value = item.dpAmount || 0;
+
+            currentBase64Image = item.image || "";
+            if (currentBase64Image) {
+                imagePreview.src = currentBase64Image;
                 imagePreview.classList.remove('hidden');
                 noImgText.classList.add('hidden');
+            } else {
+                imagePreview.classList.add('hidden');
+                noImgText.classList.remove('hidden');
             }
 
             calculateTotals();
             orderModal.classList.remove('hidden');
         };
 
-        // Delete Order
         window.deleteOrder = function(id) {
-            if (confirm(`Apakah Anda yakin ingin menghapus pesanan ${id}?`)) {
+            if (confirm(`Apakah Anda yakin ingin menghapus order ${id}?`)) {
                 orders = orders.filter(o => o.id !== id);
                 saveDatabase();
                 renderTable();
@@ -777,69 +924,61 @@
             }
         };
 
-        let activeDetailOrder = null;
-
         window.viewDetail = function(id) {
-            const ord = orders.find(o => o.id === id);
-            if (!ord) return;
+            const item = orders.find(o => o.id === id);
+            if (!item) return;
 
-            activeDetailOrder = ord;
-
-            let statusBadge = '';
-            if(ord.status === 'Pending') statusBadge = '<span class="text-yellow-400 font-bold">Pending</span>';
-            else if(ord.status === 'Proses') statusBadge = '<span class="text-blue-400 font-bold">Dalam Proses</span>';
-            else statusBadge = '<span class="text-green-400 font-bold">Selesai</span>';
+            const sisa = item.totalPrice - (item.dpAmount || 0);
 
             detailContent.innerHTML = `
-                <div class="text-center pb-4 border-b border-gray-800">
-                    <span class="text-xs text-gray-500 uppercase tracking-widest">ID Order</span>
-                    <h2 class="text-2xl font-black text-white">${ord.id}</h2>
-                    <p class="text-xs text-gray-400">Status: ${statusBadge}</p>
+                <div class="text-center border-b border-gray-800 pb-3">
+                    <h2 class="text-xl font-black fire-gradient-text">HANS SUBLIM & PRINTING</h2>
+                    <p class="text-xs text-gray-400">Nota Pesanan / Surat Perintah Kerja</p>
+                    <p class="text-xs font-bold text-red-500 mt-1">${item.id}</p>
                 </div>
 
-                <div class="space-y-3">
-                    <div>
-                        <span class="text-xs text-gray-500">Nama Customer:</span>
-                        <p class="font-bold text-white text-base">${escapeHtml(ord.customerName)}</p>
-                    </div>
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between"><span class="text-gray-400">Customer:</span> <span class="font-bold text-white">${item.customerName}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Tgl Masuk:</span> <span class="text-gray-200">${item.dateIn}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Deadline:</span> <span class="text-red-400 font-bold">${item.deadline}</span></div>
+                </div>
 
-                    <div class="grid grid-cols-2 gap-2 text-xs bg-darkbg p-3 rounded-lg border border-gray-800">
-                        <div>
-                            <span class="text-gray-500">Tanggal Masuk:</span>
-                            <p class="text-gray-200 font-medium">${ord.dateIn}</p>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Deadline:</span>
-                            <p class="text-red-400 font-bold">${ord.deadline}</p>
-                        </div>
-                    </div>
+                <div class="border-t border-gray-800 pt-3">
+                    <table class="w-full text-xs text-left">
+                        <tr class="text-gray-500 border-b border-gray-800">
+                            <th class="py-1">Jenis</th>
+                            <th class="py-1 text-center">Qty</th>
+                            <th class="py-1 text-right">Subtotal</th>
+                        </tr>
+                        <tr>
+                            <td class="py-1">Lengan Pendek</td>
+                            <td class="text-center">${item.qtyShort}</td>
+                            <td class="text-right">${formatRupiah(item.qtyShort * item.priceShort)}</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1">Lengan Panjang</td>
+                            <td class="text-center">${item.qtyLong}</td>
+                            <td class="text-right">${formatRupiah(item.qtyLong * item.priceLong)}</td>
+                        </tr>
+                        ${item.priceSizeCharge > 0 ? `
+                        <tr>
+                            <td class="py-1">Cas Jumbo (${item.sizeExtraNote})</td>
+                            <td class="text-center">-</td>
+                            <td class="text-right">${formatRupiah(item.priceSizeCharge)}</td>
+                        </tr>` : ''}
+                    </table>
+                </div>
 
-                    <div class="border-t border-b border-gray-800 py-3 space-y-2">
-                        <span class="text-xs font-bold text-red-400 uppercase">Rincian Produk</span>
-                        <div class="flex justify-between text-xs">
-                            <span class="text-gray-300">Lengan Pendek (${ord.qtyShort} Pcs x ${formatRupiah(ord.priceShort)})</span>
-                            <span class="font-semibold text-white">${formatRupiah(ord.qtyShort * ord.priceShort)}</span>
-                        </div>
-                        <div class="flex justify-between text-xs">
-                            <span class="text-gray-300">Lengan Panjang (${ord.qtyLong} Pcs x ${formatRupiah(ord.priceLong)})</span>
-                            <span class="font-semibold text-white">${formatRupiah(ord.qtyLong * ord.priceLong)}</span>
-                        </div>
-                        ${ord.priceSizeCharge > 0 ? `
-                        <div class="flex justify-between text-xs text-orange-400">
-                            <span>Cas Size Jumbo (${escapeHtml(ord.sizeExtraNote || 'Extra')})</span>
-                            <span class="font-semibold">${formatRupiah(ord.priceSizeCharge)}</span>
-                        </div>` : ''}
+                <div class="bg-darkbg p-3 rounded-lg space-y-1 font-semibold text-xs border border-gray-800">
+                    <div class="flex justify-between"><span>Total Tagihan:</span> <span class="text-white">${formatRupiah(item.totalPrice)}</span></div>
+                    <div class="flex justify-between text-green-400"><span>Uang Muka (DP):</span> <span>- ${formatRupiah(item.dpAmount || 0)}</span></div>
+                    <div class="flex justify-between text-sm font-bold border-t border-gray-800 pt-1 text-yellow-400">
+                        <span>Sisa Pembayaran:</span> <span>${formatRupiah(sisa > 0 ? sisa : 0)}</span>
                     </div>
+                </div>
 
-                    <div class="flex justify-between items-center text-sm font-bold bg-gray-800 p-3 rounded-lg">
-                        <span class="text-gray-300">Total Pembayaran:</span>
-                        <span class="text-yellow-400 text-lg">${formatRupiah(ord.totalPrice)}</span>
-                    </div>
-
-                    <div>
-                        <span class="text-xs text-gray-500 block mb-2">Gambar / Desain Produksi:</span>
-                        <img src="${ord.image}" class="w-full max-h-60 object-contain bg-darkbg border border-gray-800 rounded-xl p-2">
-                    </div>
+                <div class="border-t border-gray-800 pt-3 text-center">
+                    <img src="${item.image}" class="max-h-40 mx-auto rounded-lg border border-gray-700 object-contain">
                 </div>
             `;
 
@@ -848,86 +987,7 @@
 
         closeDetailModal.addEventListener('click', () => detailModal.classList.add('hidden'));
         closeDetailBtn.addEventListener('click', () => detailModal.classList.add('hidden'));
-
-        // Print Order / Invoice Handler
-        printOrderBtn.addEventListener('click', () => {
-            if (!activeDetailOrder) return;
-            const printWin = window.open('', '_blank');
-            printWin.document.write(`
-                <html>
-                <head>
-                    <title>SPK / Invoice - ${activeDetailOrder.id}</title>
-                    <style>
-                        body { font-family: sans-serif; padding: 20px; color: #000; }
-                        h1 { font-size: 20px; margin-bottom: 0; }
-                        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                        .table th, .table td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
-                        .total { font-size: 16px; font-weight: bold; }
-                        img { max-width: 300px; margin-top: 15px; border: 1px solid #ccc; }
-                    </style>
-                </head>
-                <body>
-                    <h1>HANS CUSTOM PRINTING & SUBLIMATION</h1>
-                    <p>SPK / NOTA PESANAN PRODUKSI</p>
-                    <hr>
-                    <p><b>ID Order:</b> ${activeDetailOrder.id}</p>
-                    <p><b>Customer:</b> ${activeDetailOrder.customerName}</p>
-                    <p><b>Tanggal Masuk:</b> ${activeDetailOrder.dateIn} | <b>Deadline:</b> ${activeDetailOrder.deadline}</p>
-                    
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Qty</th>
-                                <th>Harga Unit</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Lengan Pendek</td>
-                                <td>${activeDetailOrder.qtyShort} Pcs</td>
-                                <td>${formatRupiah(activeDetailOrder.priceShort)}</td>
-                                <td>${formatRupiah(activeDetailOrder.qtyShort * activeDetailOrder.priceShort)}</td>
-                            </tr>
-                            <tr>
-                                <td>Lengan Panjang</td>
-                                <td>${activeDetailOrder.qtyLong} Pcs</td>
-                                <td>${formatRupiah(activeDetailOrder.priceLong)}</td>
-                                <td>${formatRupiah(activeDetailOrder.qtyLong * activeDetailOrder.priceLong)}</td>
-                            </tr>
-                            ${activeDetailOrder.priceSizeCharge > 0 ? `
-                            <tr>
-                                <td>Cas Ukuran Jumbo (${activeDetailOrder.sizeExtraNote})</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>${formatRupiah(activeDetailOrder.priceSizeCharge)}</td>
-                            </tr>
-                            ` : ''}
-                        </tbody>
-                    </table>
-
-                    <p class="total">TOTAL TAGIHAN: ${formatRupiah(activeDetailOrder.totalPrice)}</p>
-                    <br>
-                    <p><b>Lampiran Desain Produksi:</b></p>
-                    <img src="${activeDetailOrder.image}">
-                    <script>
-                        window.onload = function() { window.print(); }
-                    <\/script>
-                </body>
-                </html>
-            `);
-            printWin.document.close();
-        });
-
-        // Search and Filter Listeners
-        searchInput.addEventListener('input', renderTable);
-        statusFilter.addEventListener('change', renderTable);
-
-        // Utility Helper
-        function escapeHtml(str) {
-            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
+        printOrderBtn.addEventListener('click', () => window.print());
     </script>
 </body>
 </html>
